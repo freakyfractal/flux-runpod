@@ -1,4 +1,4 @@
-# CUDA 12.4 • PyTorch 2.3 • Python 3.11
+# CUDA 12.4 • PyTorch 2.4 • Python 3.11
 FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
