@@ -6,9 +6,11 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     HF_HOME=/data/hf-cache
 
-# System deps
+# System + Python deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        git curl ca-certificates && \
+        python3 python3-pip git curl ca-certificates && \
+    ln -s /usr/bin/python3 /usr/local/bin/python && \
+    ln -s /usr/bin/pip3 /usr/local/bin/pip && \
     rm -rf /var/lib/apt/lists/*
 
 # Python deps
@@ -20,4 +22,3 @@ WORKDIR /workspace
 COPY runpod_handler.py .
 
 CMD ["python", "-u", "runpod_handler.py"]
-
