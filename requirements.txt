@@ -8,8 +8,9 @@ accelerate==0.29.3
 safetensors==0.4.3
 peft==0.10.0
 
-# Tokenizer (SentencePiece required by Flux 1‑dev)
+# Tokenizer & protocol buffers
 sentencepiece==0.1.99
+protobuf==4.25.3  # required by Transformers fast-tokenizer conversion
 
 # RunPod SDK
 runpod==1.5.2
