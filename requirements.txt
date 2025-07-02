@@ -1,9 +1,15 @@
 --extra-index-url https://download.pytorch.org/whl/cu124
 torch==2.4.1+cu124
 
+# Diffusion stack
 diffusers==0.30.2
 transformers==4.42.0
 accelerate==0.29.3
 safetensors==0.4.3
 peft==0.10.0
+
+# Tokenizer (SentencePiece required by Flux 1‑dev)
+sentencepiece==0.1.99
+
+# RunPod SDK
 runpod==1.5.2
