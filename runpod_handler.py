@@ -45,21 +45,36 @@ def handler(event):
     # RunPod wraps payloads as {"input": {...}}; fall back to raw JSON if wrapper missing.
     inp = event.get("input", event)
 
-    prompt = inp["prompt"]
-    neg    = inp.get("negative_prompt", "")
+            prompt = inp["prompt"]
+    neg    = inp.get("negative_prompt")  # optional
     steps   = int(inp.get("steps", 20))
     cfg     = float(inp.get("cfg", 7.0))
+    seed    = inp.get("seed")            # optional
     loras   = inp.get("loras", {})
 
     apply_loras(loras)
 
+    call_kwargs = {
+        "prompt": prompt,
+        "num_inference_steps": steps,
+    }
+    sig = pipe.__call__.__code__.co_varnames  # pipeline signature
+
+    # Optional params
+    if neg is not None and "negative_prompt" in sig:
+        call_kwargs["negative_prompt"] = neg
+    if "guidance_scale" in sig:
+        call_kwargs["guidance_scale"] = cfg
+    if seed is not None and "generator" in sig:
+        gen = torch.Generator(device="cuda").manual_seed(int(seed))
+        call_kwargs["generator"] = gen
+    if neg is not None and "negative_prompt" in sig:
+        call_kwargs["negative_prompt"] = neg
+    if "guidance_scale" in sig:
+        call_kwargs["guidance_scale"] = cfg
+
     t0 = time.time()
-    img = pipe(
-        prompt,
-        negative_prompt=neg,
-        num_inference_steps=steps,
-        guidance_scale=cfg
-    ).images[0]
+    img = pipe(**call_kwargs).images[0]
 
     buf = io.BytesIO()
     img.save(buf, format="PNG")
