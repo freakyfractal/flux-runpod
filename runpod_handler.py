@@ -14,7 +14,12 @@ pipe = AutoPipelineForText2Image.from_pretrained(
     token=token  # explicit auth
 ).to("cuda")
 pipe.scheduler = LCMScheduler.from_config(pipe.scheduler.config)
-pipe.enable_xformers_memory_efficient_attention()
+# Try enabling xFormers; skip if wheel unavailable
+try:
+    import xformers  # noqa: F401
+    pipe.enable_xformers_memory_efficient_attention()
+except (ModuleNotFoundError, RuntimeError):
+    print("xformers not available — proceeding without memory‑efficient attention")
 os.makedirs(CACHE_DIR, exist_ok=True)
 
 
