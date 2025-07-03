@@ -41,27 +41,35 @@ def apply_loras(loras: dict[str, str]):
 
 
 def handler(event):
-    # RunPod wraps payload as { "input": { ... } }
-# If user POSTs bare JSON, fallback gracefully
-inp = event.get("input", event)
+    """Main RunPod handler."""
+    # RunPod wraps payloads as {"input": {...}}; fall back to raw JSON if wrapper missing.
+    inp = event.get("input", event)
+
     prompt = inp["prompt"]
     neg    = inp.get("negative_prompt", "")
-    steps  = int(inp.get("steps", 20))
-    cfg    = float(inp.get("cfg", 7.0))
-    loras  = inp.get("loras", {})
+    steps   = int(inp.get("steps", 20))
+    cfg     = float(inp.get("cfg", 7.0))
+    loras   = inp.get("loras", {})
 
     apply_loras(loras)
 
     t0 = time.time()
-    img = pipe(prompt,
-               negative_prompt=neg,
-               num_inference_steps=steps,
-               guidance_scale=cfg).images[0]
-    buf = io.BytesIO(); img.save(buf, format="PNG")
+    img = pipe(
+        prompt,
+        negative_prompt=neg,
+        num_inference_steps=steps,
+        guidance_scale=cfg
+    ).images[0]
 
-    return runpod.serverless.utils.generic_response(200, {
-        "latency_sec": round(time.time() - t0, 2),
-        "image_png_base64": base64.b64encode(buf.getvalue()).decode()
-    })
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
 
-runpod.serverless.start({"handler": handler})
+    return runpod.serverless.utils.generic_response(
+        200,
+        {
+            "latency_sec": round(time.time() - t0, 2),
+            "image_png_base64": base64.b64encode(buf.getvalue()).decode()
+        }
+    )
+
+runpod.serverless.start({"handler": handler})({"handler": handler})
