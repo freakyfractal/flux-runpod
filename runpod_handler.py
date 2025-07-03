@@ -71,12 +71,10 @@ def handler(event):
     img = pipe(**call_kwargs).images[0]
     buf = io.BytesIO(); img.save(buf, format="PNG")
 
-    return runpod.serverless.utils.generic_response(
-        200,
-        {
-            "latency_sec": round(time.time() - t0, 2),
-            "image_png_base64": base64.b64encode(buf.getvalue()).decode()
-        }
-    )
+    return {
+        "latency_sec": round(time.time() - t0, 2),
+        "image_png_base64": base64.b64encode(buf.getvalue()).decode()
+    }
+
 
 runpod.serverless.start({"handler": handler})
