@@ -26,7 +26,7 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 def apply_loras(loras: dict[str, str]):
     """Fuse LoRAs and cache result on local SSD."""
     if not loras:
-        pipe.set_adapters([])
+        # No LoRAs requested — keep base weights untouched
         return
     key = hashlib.sha1("".join(sorted(loras.values())).encode()).hexdigest()[:16]
     fused_path = f"{CACHE_DIR}/{key}"
@@ -41,7 +41,9 @@ def apply_loras(loras: dict[str, str]):
 
 
 def handler(event):
-    inp = event["input"]
+    # RunPod wraps payload as { "input": { ... } }
+# If user POSTs bare JSON, fallback gracefully
+inp = event.get("input", event)
     prompt = inp["prompt"]
     neg    = inp.get("negative_prompt", "")
     steps  = int(inp.get("steps", 20))
